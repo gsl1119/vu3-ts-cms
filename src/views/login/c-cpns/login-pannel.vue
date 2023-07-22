@@ -6,7 +6,7 @@
       <el-checkbox v-molde="isRenPwd" label="记住密码" />
       <span>忘记密码</span>
     </div>
-    <div class="login-btn">login-btn</div>
+    <div class="login-btn">login-btntestr</div>
   </div>
 </template>
 
