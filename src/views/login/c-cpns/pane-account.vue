@@ -19,13 +19,13 @@
 import { reactive, ref } from "vue"
 import { ElMessage } from "element-plus"
 import type { FormRules, ElForm } from "element-plus"
-import { accountLoginRequest } from "@/service/login/login"
 
 import type { IAccount } from "@/types"
 import useLoginStore from "@/store/login/login"
+import { localCache } from "@/utils/cache"
 const account = reactive<IAccount>({
-  name: "",
-  password: ""
+  name: localCache.getCache("name") ?? "",
+  password: localCache.getCache("password") ?? ""
 })
 
 const accountRules: FormRules = {
@@ -44,10 +44,20 @@ const accountRules: FormRules = {
 }
 
 const formRef = ref<InstanceType<typeof ElForm>>()
-function loginAction() {
+function loginAction(isRenPwd: boolean) {
   formRef.value?.validate(async (valid) => {
     if (valid) {
-      useLoginStore().loginAccountAction(account)
+      useLoginStore()
+        .loginAccountAction(account)
+        .then((res) => {
+          if (isRenPwd) {
+            localCache.setCache("name", account.name)
+            localCache.setCache("password", account.password)
+          } else {
+            localCache.removeCache("name")
+            localCache.removeCache("password")
+          }
+        })
     } else {
       ElMessage.error("请检查输入的内容")
     }

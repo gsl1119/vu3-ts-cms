@@ -39,15 +39,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue"
+import { ref, watch } from "vue"
 import paneAccount from "./pane-account.vue"
 import panePhone from "./pane-phone.vue"
+import { localCache } from "@/utils/cache"
 
-const isRenPwd = ref<boolean>(false)
+const isRenPwd = ref<boolean>(localCache.getCache("isRenPwd") ?? false)
 const activeName = ref<string>("account")
 const accountRef = ref<InstanceType<typeof paneAccount>>()
+
+watch(isRenPwd, (newVal) => {
+  localCache.setCache("isRenPwd", newVal)
+})
+
 const handleLoginClick = () => {
-  accountRef.value?.loginAction()
+  if (activeName.value === "account") {
+    accountRef.value?.loginAction(isRenPwd.value)
+  } else {
+    console.log("phone")
+  }
 }
 </script>
 
