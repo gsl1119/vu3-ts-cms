@@ -7,6 +7,8 @@ import {
 import type { IAccount } from "@/types"
 import { localCache } from "@/utils/cache"
 import router from "@/router"
+import type { RouteRecordRaw } from "vue-router"
+import { mapMenusToRoutes } from "@/utils/maps-menus"
 
 interface ILoginState {
   token: string
@@ -17,7 +19,7 @@ interface ILoginState {
 const LOGIN_TOKEN = "login/token"
 const useLoginStore = defineStore("login", {
   state: (): ILoginState => ({
-    token: localCache.getCache(LOGIN_TOKEN) ?? "",
+    token: "",
     userInfo: {},
     userMenus: []
   }),
@@ -34,9 +36,27 @@ const useLoginStore = defineStore("login", {
 
       const userMenuRes = await getUserMenusByRoleId(this.userInfo.role.id)
       this.userMenus = userMenuRes.data
+      localCache.setCache("userInfo", userInfoRes.data)
+      localCache.setCache("userMenus", userMenuRes.data)
 
+      const routes = mapMenusToRoutes(userMenuRes.data)
+
+      routes.forEach((route) => router.addRoute("main", route))
       // 跳转
       router.push("/main")
+    },
+    loadLocalCacheAction() {
+      const token = localCache.getCache(LOGIN_TOKEN)
+      const userInfo = localCache.getCache("userInfo")
+      const userMenus = localCache.getCache("userMenus")
+      if (token && userInfo && userMenus) {
+        this.token = token
+        this.userInfo = userInfo
+        this.userMenus = userMenus
+
+        const routes = mapMenusToRoutes(userMenus)
+        routes.forEach((route) => router.addRoute("main", route))
+      }
     }
   }
 })

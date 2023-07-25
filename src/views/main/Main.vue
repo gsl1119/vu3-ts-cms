@@ -1,40 +1,58 @@
 <template>
   <div class="main">
-    <el-container class="container">
-      <el-aside width="200px"><MainMenu></MainMenu> </el-aside>
+    <el-container class="main-content">
+      <el-aside :width="isFold ? '60px' : '210px'">
+        <nav-menu :is-fold="isFold" />
+      </el-aside>
       <el-container>
-        <el-header> <MainHeader></MainHeader> </el-header>
-        <el-main>Main</el-main>
+        <el-header height="48px">
+          <nav-header @fold-change="handleFoldChange" />
+        </el-header>
+        <el-main>
+          <router-view />
+        </el-main>
       </el-container>
     </el-container>
-    <!-- <h2>main：{{ countStore.counter }}--{{ countStore.doubleCounter }}</h2>
-    <button @click="handleExitClick">退出登录</button> -->
   </div>
 </template>
 
-<script lang="ts" setup>
-import useCounterStore from "@/store/counter"
-import { localCache } from "@/utils/cache"
-import { useRouter } from "vue-router"
-import MainMenu from "@/components/main-menu/main-menu.vue"
-import MainHeader from "@/components/main-header/main-header.vue"
-const countStore = useCounterStore()
-
-function changeCounter() {
-  countStore.changeCounterAction(1000)
-}
-const router = useRouter()
-const handleExitClick = () => {
-  localCache.removeCache("login/token")
-  router.push("/login")
+<script setup lang="ts" name="main">
+import { ref } from "vue"
+import NavMenu from "@/components/main-menu/main-menu.vue"
+import navHeader from "@/components/main-header/main-header.vue"
+const isFold = ref(false)
+function handleFoldChange(isFoldValue: boolean) {
+  isFold.value = isFoldValue
 }
 </script>
 
-<style lang="less" scoped>
+<style scoped lang="less">
 .main {
+  width: 100%;
   height: 100%;
-  .container {
-    height: 100%;
+}
+
+.main-content {
+  height: 100%;
+
+  .el-aside {
+    overflow-x: hidden;
+    overflow-y: auto;
+    line-height: 200px;
+    text-align: left;
+    cursor: pointer;
+    background-color: #001529;
+    transition: width 0.3s linear;
+    scrollbar-width: none; /* firefox */
+    -ms-overflow-style: none; /* IE 10+ */
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .el-main {
+    background-color: #f0f2f5;
   }
 }
 </style>
